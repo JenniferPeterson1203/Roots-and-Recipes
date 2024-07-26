@@ -78,6 +78,44 @@ const getSingleRecipe = async (id) => {
   }
 };
 
+// To delete ONE recipe based on the user id and the recipe id
+const deleteRecipeByRecipeId = async (id) => {
+  try {
+    const query = "DELETE FROM recipes WHERE id = $1 RETURNING *";
+    const deletedRecipe = await db.one(query, [id]);
+    return deletedRecipe;
+  } catch (error) {
+    console.error("Error executing this DELETE query:", error);
+    throw error;
+  }
+};
+
+// EDIT RECIPE BASED ON RECIPE ID
+const updateRecipeById = async (id, recipe) => {
+  const { name, chef, family, photo, status, ingredients, steps } = recipe;
+  try {
+    const query = `
+      UPDATE recipes SET 
+ name = $1, chef = $2, family = $3, photo = $4, status = $5, ingredients = $6, steps = $7
+      WHERE id = $8 
+      RETURNING *`;
+    const updatedRecipe = await db.one(query, [
+      name,
+      chef,
+      family,
+      photo,
+      status,
+      ingredients,
+      steps,
+      id,
+    ]);
+    return updatedRecipe;
+  } catch (error) {
+    console.error("Error updating recipe:", error);
+    throw error;
+  }
+};
+
 // // GET RECIPES WITH LUNCH AS A CATEGORY
 const getAllLunchRecipes = async () => {
   try {
@@ -116,4 +154,6 @@ module.exports = {
   getAllDinnerRecipes,
   lastRecipeById,
   getSingleRecipe,
+  deleteRecipeByRecipeId,
+  updateRecipeById,
 };
