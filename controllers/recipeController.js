@@ -12,6 +12,8 @@ const {
   getAllDinnerRecipes,
   lastRecipeById,
   getSingleRecipe,
+  deleteRecipeByRecipeId,
+  updateRecipeById,
 } = require("../queries/recipes");
 
 // To get ALL PUBLIC recipes
@@ -60,22 +62,6 @@ recipes.get("/dinner", async (req, res) => {
   }
 });
 
-// To get ALL of the Recipes that the user created
-recipes.get("/:user_id", async (req, res) => {
-  const { user_id } = req.params;
-
-  try {
-    const recipes = await recipesById(user_id);
-    if (recipes.length > 0) {
-      res.status(200).json(recipes);
-    } else {
-      res.status(404).json({ error: "No recipes found for this user ID" });
-    }
-  } catch (error) {
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
 // To get the most recent recipe the user has created
 recipes.get("/latest/:user_id", async (req, res) => {
   const { user_id } = req.params;
@@ -100,6 +86,34 @@ recipes.get("/single_recipe/:id", async (req, res) => {
     res.status(500).json({ error: "server error" });
   }
 });
+
+// To get ALL of the Recipes that the user created
+recipes.get("/:user_id", async (req, res) => {
+  const { user_id } = req.params;
+
+  try {
+    const recipes = await recipesById(user_id);
+    if (recipes.length > 0) {
+      res.status(200).json(recipes);
+    } else {
+      res.status(404).json({ error: "No recipes found for this user ID" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// UPDATE A RECIPE BY ID
+recipes.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const updatedRecipe = await updateRecipeById(id, req.body);
+    res.status(200).json(updatedRecipe);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // recipes.get("/recipes/:user_id", verifyToken, async (req, res) => {
 //   const userId = req.userId;
 
@@ -116,4 +130,13 @@ recipes.get("/single_recipe/:id", async (req, res) => {
 //   }
 // });
 
+recipes.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deletedRecipe = await deleteRecipeByRecipeId(id);
+    res.status(200).json(deletedRecipe);
+  } catch (error) {
+    res.status(400).json({ error: "Recipe not found with this ID" });
+  }
+});
 module.exports = recipes;
